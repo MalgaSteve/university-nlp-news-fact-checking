@@ -2,11 +2,16 @@ from typing import ClassVar
 import requests
 from crewai import Agent, Task, Crew, Process, LLM
 from crewai.tools import BaseTool
+import os
+import dotenv import load_dotenv
+
+load_dotenv()
+NEWS_API_KEY = os.getenv("API_KEY")
 
 class FetchNews(BaseTool):
     name: str = "Fetch news using NewsAPI"
     description: str = "This tool fetches news using NewsAPI"
-    API_KEY: ClassVar[str] = "c52b6196b26d43d2956835ff4955c7d6"
+    API_KEY: ClassVar[str] = NEWS_API_KEY
     BASE_URL: ClassVar[str] = "https://newsapi.org/v2/everything"
 
     def _run(self, topic:str) -> str:
