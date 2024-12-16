@@ -3,10 +3,10 @@ import requests
 from crewai import Agent, Task, Crew, Process, LLM
 from crewai.tools import BaseTool
 import os
-import dotenv import load_dotenv
+from dotenv import load_dotenv
 
 load_dotenv()
-NEWS_API_KEY = os.getenv("API_KEY")
+NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
 class FetchNews(BaseTool):
     name: str = "Fetch news using NewsAPI"
