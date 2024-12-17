@@ -23,7 +23,7 @@ news_aggregator = Agent(
         role='News Aggregator',
         goal='Research in real-time the most relevant news',
         backstory='You are an assistant specialized finding the most relevant news about {topic}',
-        verbose=True,
+        verbose=False,
         allow_delegation=False,
         tool=[FetchNews],
         llm=llm)
@@ -32,7 +32,7 @@ summerizer = Agent(
         role='News Summerizer',
         goal='Write comppelling and engeaging blog posts about {topic}',
         backstory='You are an expert at give conscice and clear summerizations of news articles about {topic}',
-        verbose=True,
+        verbose=False,
         allow_delegation=False,
         llm=llm)
 
@@ -40,11 +40,19 @@ fact_checker = Agent(
         role='Fact Checker',
         goal='cross-reference key claims in the summaries with existing fact-checked sources or reliable news databases',
         backstory='An expert at {topic} which has a lot of experience in fact-checking news articles of {topic}',
-        verbose=True,
+        verbose=False,
         allow_delegation=False,
         tool=[FactCheckTool],
         llm=llm,
     )
+
+html_formatter = Agent(
+        role='Html Formatter',
+        goal='Take a string of summaries and fact-checked claims and format it in html format',
+        backstory='A senior html developer with profiency in formatting text in beautiful html code',
+        verbose=True,
+        llm=llm
+        )
 
 task1 = Task(description='Gather in real-time the most relevant news', 
              agent=news_aggregator,
@@ -54,15 +62,19 @@ task2 = Task(description='Summarize news articles about {topic}',
              agent=summerizer,
              expected_output='A summarization of news about {topic}')
 
-task3 = Task(description='Cross reference key claims in the summaries with exisiting fact checking sources',
+task3 = Task(description='Verify claims within summaries, marking each as Verified, Partially Verified, or Unverified based on reliable cross-referencing',
              agent=fact_checker,
-             expected_output='Verify claims within summaries, marking each as Verified, Partially Verified, or Unverified based on reliable cross-referencing in html format',
+             expected_output='String with summaries of each articles marking each as Verified, Partially Verified or Unverified',
              )
+
+task4 = Task(description='Format string into beautiful html code',
+             agent=html_formatter,
+             expected_output='Beautiful formatted HTML code')
 
 
 crew = Crew(
-        agents = [news_aggregator, summerizer, fact_checker],
-        tasks = [task1, task2, task3],
+        agents = [news_aggregator, summerizer, fact_checker, html_formatter],
+        tasks = [task1, task2, task3, task4],
         verbose=True,
         process = Process.sequential
         )
@@ -81,14 +93,14 @@ def process_topic():
     try:
         # Run the process using crew
         result = crew.kickoff(inputs={"topic": topic})
-        print(result.raw)
+        print(type(result.raw))
         print(task3.output.raw)
 
         # Ensure result is properly formatted (if crew returns complex data)
         if isinstance(result.raw, dict):
             return jsonify(result.raw), 200
-        elif isinstance(task3.output.raw, str):
-            return task3.output.raw, 200
+        elif isinstance(result.raw, str):
+            return result.raw, 200
         else:
             return jsonify({"error": "Unexpected result format"}), 500
 
