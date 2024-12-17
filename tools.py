@@ -31,17 +31,18 @@ class FetchNews(BaseTool):
 
             # Handle empty or missing results
             if data.get("status") != "ok" or not data.get("articles"):
-                return f"No news articles found for query: {query}"
+                return f"No news articles found for topic: {topic}"
 
             # Summarize the top articles
             articles = data["articles"]
-            result = f"Top {len(articles)} news articles for '{query}':\n\n"
+            result = f"Top {len(articles)} news articles for '{topic}':\n\n"
             for i, article in enumerate(articles, 1):
                 result += (
                     f"{i}. **{article['title']}**\n"
                     f"   Source: {article['source']['name']}\n"
                     f"   Link: {article['url']}\n"
                     f"   Description: {article['description'] or 'No description available.'}\n\n"
+                    f"   Content: {article['content'] or 'No content available.'}\n\n"
                     )
             return result
 

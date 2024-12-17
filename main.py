@@ -78,7 +78,8 @@ task2 = Task(description='Summarize news articles about {topic}',
 
 task3 = Task(description='Cross reference key claims in the summaries with exisiting fact checking sources',
              agent=fact_checker,
-             expected_output='A markdown file which includes each summarization and an overview if they are real or fake news')
+             expected_output='A markdown file which includes each summarization and an overview if they are real or fake news',
+             output_file='result.md')
 
 
 crew = Crew(
@@ -89,6 +90,8 @@ crew = Crew(
         )
 
 topic = "Trump"
+test_tool = FetchNews()
+print(test_tool.run(topic))
 
 
 result = crew.kickoff(inputs={"topic": topic})
