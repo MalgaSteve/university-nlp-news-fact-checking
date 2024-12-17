@@ -6,6 +6,9 @@ from crewai import Agent, Task, Crew, Process, LLM
 from crewai.tools import BaseTool
 from tools import FetchNews, FactCheckTool
 from flask import Flask, request, jsonify, render_template
+import os
+os.environ["CREWAI_DISABLE_TELEMETRY"] = "1"
+
 
 app = Flask(__name__) 
 
@@ -14,6 +17,7 @@ llm = LLM(
     base_url="http://localhost:11434",
     verbose=True
 )
+
 
 news_aggregator = Agent(
         role='News Aggregator',
@@ -41,7 +45,7 @@ fact_checker = Agent(
         tool=[FactCheckTool],
         llm=llm,
     )
-
+'''
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -66,7 +70,7 @@ def analyze_article():
 
     if not article:
         return jsonify({"error": "Article is required"}), 400
-
+'''
 
 task1 = Task(description='Gather in real-time the most relevant news', 
              agent=news_aggregator,
@@ -89,19 +93,24 @@ crew = Crew(
         process = Process.sequential
         )
 
-topic = "Trump"
-
-test_tool = FetchNews()
-test_run, out = test_tool.run(topic)
-print(test_run, " Out:\n", out)
-
-test_tool_check = FactCheckTool()
-print(test_tool_check.run(out))
+#topic = "Trump"
 
 
-result = crew.kickoff(inputs={"topic": topic})
-return jsonify({"result": result})
+@app.route('/')
+def index():
+    return render_template('index.html')
 
+@app.route('/process', methods=['POST'])
+def process_topic():
+    topic = request.form.get("topic")
+
+    if not topic:
+        return jsonify({"error": "Topic is required"}), 400
+
+    # Run crew
+    result = crew.kickoff(inputs={"topic": topic})
+
+    return render_template('index.html', topic=topic, result=result)
 
 if __name__ == '__main__':
     app.run(debug=True)
