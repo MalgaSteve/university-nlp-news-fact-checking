@@ -27,3 +27,7 @@ echo "FACT_API_KEY=Your Key" >> .env
 ```
 python main.py
 ```
+
+## Presentation
+
+'NLP Project.pdf'
