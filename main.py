@@ -90,8 +90,13 @@ crew = Crew(
         )
 
 topic = "Trump"
+
 test_tool = FetchNews()
-print(test_tool.run(topic))
+test_run, out = test_tool.run(topic)
+print(test_run, " Out:\n", out)
+
+test_tool_check = FactCheckTool()
+print(test_tool_check.run(out))
 
 
 result = crew.kickoff(inputs={"topic": topic})

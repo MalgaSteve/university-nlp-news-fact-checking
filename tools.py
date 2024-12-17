@@ -44,7 +44,7 @@ class FetchNews(BaseTool):
                     f"   Description: {article['description'] or 'No description available.'}\n\n"
                     f"   Content: {article['content'] or 'No content available.'}\n\n"
                     )
-            return result
+            return result, article['description']
 
         except requests.exceptions.RequestException as e:
             return f"Error fetching news: {str(e)}"
@@ -52,20 +52,24 @@ class FetchNews(BaseTool):
 class FactCheckTool(BaseTool):
     name: str = "FactCheckTool"
     description: str = "Cross-references claims with fact-check data from reliable sources."
+    API_KEY: ClassVar[str] = FACT_API_KEY
+    BASE_URL: ClassVar[str] = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
 
-    def __init__(self):
-        self.api_key = FACT_API_KEY
-        self.api_url = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
+#    def __init__(self):
+#        API_KEY = FACT_API_KEY
+#        BASE_URL = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
     
     def _run(self, claim: str) -> str:
+        print(claim)
         # Construct the API request URL
         params = {
             'query': claim,
-            'key': self.api_key,
+            'key': self.API_KEY,
         }
 
         # Make the request to Google Fact Check API
-        response = requests.get(self.api_url, params=params)
+        response = requests.get(self.BASE_URL, params=params)
+        print(response.url)
 
         if response.status_code != 200:
             return f"Error: Unable to fetch data from the API. Status Code: {response.status_code}"
