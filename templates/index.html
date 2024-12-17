@@ -60,6 +60,14 @@
             background-color: #005fb8;
         }
 
+		button:disabled {
+    		background-color: #d3d3d3; /* Light gray background */
+    		color: #8a8a8a; /* Darker gray text */
+    		border: 1px solid #b3b3b3; /* Subtle border */
+    		cursor: not-allowed; /* Show "not allowed" cursor */
+    		opacity: 0.6; /* Slightly transparent look */
+		}
+
         .results {
             margin-top: 1.5rem;
             padding: 1rem;
@@ -101,6 +109,8 @@
 
     <script>
         function submitTopic() {
+			const submitButton = document.querySelector('button');
+		    submitButton.disabled = true;
  
             document.getElementById("results").style.display = "none";
             document.getElementById("error").innerText = "";
@@ -119,13 +129,16 @@
             .then(response => response.text())
             .then(data => {
                 const resultsDiv = document.getElementById("results");
-                resultsDiv.innerHTML = "<h3>Results:</h3><pre>" + data + "</pre>";
+                resultsDiv.innerHTML = "<h3>Results:</h3><p>" + data + "</p>";
                 resultsDiv.style.display = "block";
             })
             .catch(err => {
                 console.error("Error:", err);
                 document.getElementById("error").innerText = "An error occurred. Please try again.";
-            });
+            })
+    		.finally(() => {
+    		    submitButton.disabled = false; // Re-enable the button
+    		});
         }
     </script>
 </body>
