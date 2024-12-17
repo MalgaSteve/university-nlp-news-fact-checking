@@ -5,6 +5,9 @@ import requests
 from crewai import Agent, Task, Crew, Process, LLM
 from crewai.tools import BaseTool
 from tools import FetchNews, FactCheckTool
+from flask import Flask, request, jsonify, render_template
+
+app = Flask(__name__) 
 
 llm = LLM(
     model="ollama/llama3.1",
@@ -39,6 +42,32 @@ fact_checker = Agent(
         llm=llm,
     )
 
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/process', methods=['POST'])
+def process_topic():
+    data = request.get_json()
+    topic = data.get("topic")
+
+    if not topic:
+        return jsonify({"error": "Topic is required"}), 400
+
+    news_result = fetch_news._run(topic)
+    articles = [line.strip() for line in news_result.split("\n") if line]
+
+    return jsonify({"articles": articles})
+
+@app.route('/analyze', methods=['POST'])
+def analyze_article():
+    data = request.get_json()
+    article = data.get("article")
+
+    if not article:
+        return jsonify({"error": "Article is required"}), 400
+
+
 task1 = Task(description='Gather in real-time the most relevant news', 
              agent=news_aggregator,
              expected_output='A list with the most relevant articles about {topic}',
@@ -61,5 +90,10 @@ crew = Crew(
 
 topic = "Trump"
 
+
 result = crew.kickoff(inputs={"topic": topic})
-print(result)
+return jsonify({"result": result})
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
